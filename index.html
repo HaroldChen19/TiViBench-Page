@@ -1,0 +1,1599 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>TiViBench: Benchmarking Think-in-Video Reasoning for Video Generative Models</title>
+<link rel="shortcut icon" type="image/x-icon" href="assets/figs/personal.jpg">
+<link href="./config_files/style.css" rel="stylesheet">
+
+
+<style>
+  p.serif{
+    font-family:"Times New Roman", Times, serif;
+  }
+  p.sansserif{
+    font-family: Arial, Helvetica, sans-serif;
+  }
+</style>
+  
+</head>
+
+<body>
+<div class="content">
+  <!-- <img src="assets/figs/logo.jpg" alt="OmniCreator Logo" style="display: block; margin: 0 auto; max-width: 15%; height: auto;"> -->
+  <h1>
+    <!-- <strong>
+      <span class="gradient-text"><i>OmniCreator</i></span>
+    </strong> -->
+    <!-- <br> -->
+    <strong>
+      <span class="gradient-black">TiViBench: Benchmarking Think-in-Video Reasoning for Video Generative Models</span>
+    </strong>
+  </h1>
+  <p id="authors" class="serif">
+    <span style="font-size: 0.8em">
+      <a href="https://haroldchen19.github.io/">Harold Haodong Chen<sup>1,2*</sup></a>
+      <a href="https://landisen.github.io/">Disen Lan<sup>3*</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Wen-Jie Shu<sup>2*</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Qingyang Liu<sup>4</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Zihan Wang<sup>1</sup></a></span>
+      <br>
+     <span style="font-size: 0.8em">
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Sirui Chen<sup>1</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Wenkai Cheng<sup>1</sup></a>
+      <a href="https://khao123.github.io/">Kanghao Chen<sup>1,2</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Hongfei Zhang<sup>1</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Zixin Zhang<sup>1,2</sup></a>
+      <a href="https://haroldchen19.github.io/TiViBench-Page/">Rongjin Guo<sup>5</sup></a>
+      </span>
+      <br>
+    <span style="font-size: 0.8em">
+      <a href="https://ych133.github.io/">Yu Cheng<sup>6</sup><sup>†</sup></a>
+      <a href="https://www.yingcong.me/">Ying-Cong Chen<sup>1,2</sup><sup>†</sup></a>
+    </span>
+    <br>
+    <span style="font-size: 0.8em; margin-top: 0.5em; color: black;">
+      <a><sup>1</sup>HKUST(GZ)</a>
+      <a><sup>2</sup>HKUST</a>
+      <a><sup>3</sup>FDU</a>
+      <a><sup>4</sup>SJTU</a>
+      <a><sup>5</sup>CityUHK</a>
+      <a><sup>6</sup>CUHK</a>
+      <br>
+      <a><sup>*</sup>Equal Contribution</a>
+      <a><sup>†</sup>Corresponding Author</a>
+    </span>
+    <!-- <br>
+    <span style="font-size: 0.7em; margin-top: 0.5em; color: black;">
+      <a style="color: black;"> Primary Contact: haroldchen328@gmail.com</a>
+    </span> -->
+  </p>
+
+  <font size="+1">
+    <p style="text-align: center;" class="sansserif">
+      <a href="https://arxiv.org/abs/2412.02114" target="" style="font-weight: bold;">[Paper]</a>&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="https://github.com/EnVision-Research/TiViBench" target="" style="font-weight: bold;">[Github]</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    </p><br>
+  </font>
+
+</div>
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 2em; font-weight: bold" class="sansserif">Abstract</p>
+  <p style="font-size: 1.2em; margin-left:5em; margin-right:5em;" class="serif">
+    The rapid evolution of video generative models has shifted their focus from producing visually plausible outputs to tackling tasks
+    requiring physical plausibility and logical consistency. However, despite recent breakthroughs such as Veo 3's chain-of-frames reasoning,
+    it remains unclear whether these models can exhibit reasoning capabilities similar to large language models (LLMs). Existing benchmarks predominantly
+    evaluate visual fidelity and temporal coherence, failing to capture higher-order reasoning abilities. To bridge this gap, we propose <b>TiViBench</b>,
+    a hierarchical manner benchmark specifically designed to evaluate the reasoning capabilities of image-to-video (I2V) generation models. TiViBench
+    systematically assesses reasoning across four dimensions: i) <b>Structural Reasoning & Search</b>, ii) <b>Spatial & Visual Pattern Reasoning</b>, iii)
+    <b>Symbolic & Logical Reasoning</b>, and iv) <b>Action Planning & Task Execution</b>, spanning 24 diverse task scenarios across 3 difficulty levels.
+    Through extensive evaluations, we show that commercial models (<i>e.g.</i>, Sora 2, Veo 3.1) demonstrate stronger reasoning potential, while open-source
+    models reveal untapped potential that remains hindered by limited training scale and data diversity. To further unlock this potential, we introduce
+    <b>VideoTPO</b>, a simple yet effective test-time strategy inspired by preference optimization. By performing LLM self-analysis on generated candidates
+    to identify strengths and weaknesses, VideoTPO significantly enhances reasoning performance without requiring additional training, data, or reward models.
+    Together, TiViBench and VideoTPO pave the way for evaluating and advancing reasoning in video generation models, setting a foundation for future research
+    in this emerging field.</p>
+    <div style="text-align:center; margin-bottom:1em; margin-top:-1em">
+      <img src="assets/figs/tivibench.png" width="83%">
+    </div>
+</div>
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 2em; font-weight: bold" class="sansserif">Overview</p>
+  <div style="text-align:center; margin-bottom:1em;">
+    <img src="assets/figs/pipeline.png" width="80%">
+    <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.2em" class="serif">
+      Overview of our proposed (<b><i>Left</i></b>) TiViBench benchmark and (<b><i>Right</i></b>) VideoTPO framework</p>
+  </div>
+  <!-- <br> -->
+  <div style="text-align:center; margin-bottom:1em;">
+    <img src="assets/figs/stats.png" width="80%">
+    <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.2em" class="serif">
+      Overview of TiViBench's statistical distributions. (<b><i>Left</i></b>) Word distribution of prompt suites; (<b><i>Middle</i></b>) Data distribution across 24 tasks; and (<b><i>Right</i></b>) Data distribution across 3 difficulty levels.</p>
+  </div>
+</div>
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 2em; font-weight: bold" class="sansserif">Evaluation Results</p>
+    <div style="text-align:center; margin-bottom:1em;">
+      <img src="assets/figs/radar.png" width="84%">
+    </div>
+    <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.4em" class="serif">
+      Pass@1 performance overview on TiViBench of 3 commercial models and 4 open-source models.</p>
+      <!-- <br> -->
+      <div style="text-align:center; margin-bottom:1em;">
+        <img src="assets/figs/pass1.png" width="84%">
+      </div>
+      <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.8em" class="serif">
+        Detailed pass@1 performance of both open-source and commercial models on TiViBench.</p>
+        <!-- <br> -->
+        <div style="text-align:center; margin-bottom:1em;">
+          <img src="assets/figs/pass5.png" width="84%">
+        </div>
+        <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.8em" class="serif">
+          Detailed pass@5 performance of open-source models on TiViBench.</p>
+          <div style="text-align:center; margin-bottom:1em;">
+            <img src="assets/figs/tpo.png" width="84%">
+          </div>
+          <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.8em" class="serif">
+            Evaluation on TiViBench with VideoTPO.</p>
+</div>
+
+<div class="content">
+  <p style="text-align:center; font-size: 2em; font-weight: bold" class="sansserif">Failure Case Demonstration</p>
+    <div style="text-align:center; margin-bottom:1em;">
+      <img src="assets/figs/failure.png" width="88%">
+    </div>
+    <p style="text-align:center;font-size: 1.2em; margin-left:5em; margin-right:5em; margin-top:-0.4em" class="serif">
+      (<b><i>Top</i></b>) Performance of the best-performing models, <i>i.e.</i>, Sora 2 and Veo 3.1, on TiViBench across 24 tasks; (<b><i>Bottom</i></b>) Case study of the lowest-performing tasks, <i>i.e.</i> maze solving (MS), temporal ordering (TO), odd-one-out (Odd), and sudoku completion (SC).</p>
+</div>
+
+<!-- <div class="content">
+  <p style="text-align:center; font-size: 2em; font-weight: bold" class="sansserif">VideoTPO Case Demonstration</p>
+    <div style="text-align:center; margin-bottom:1em;">
+      <img src="assets/figs/failure.png" width="88%">
+    </div>
+</div>
+ -->
+
+ <div class="content">
+  <p style="text-align:center; font-size: 1.8em; font-weight: bold" class="sansserif">Case Demonstration: Structural Reasoning & Search</p>
+
+  <!-- First row: text + 3 videos -->
+  <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Graph Traversal
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS1/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS1/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS1/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS1/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS1/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS1/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_Video/SS1/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS1/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS1/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Maze Solving
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS2/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS2/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS2/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS2/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS2/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS2/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS2/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS2/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Sorting Numbers
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS3/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS3/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS3/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS3/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS3/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS3/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS3/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS3/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Temporal Ordering
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS4/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS4/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS4/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS4/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS4/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS4/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS4/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS4/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Rule Extrapolation
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS5/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS5/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS5/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS5/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS5/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS5/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS5/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS5/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Game Move
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SS6/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SS6/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SS6/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SS6/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SS6/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SS6/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SS6/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SS6/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 1.8em; font-weight: bold" class="sansserif">Case Demonstration: Spatial & Visual Pattern Reasoning</p>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Shape Fitting
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV1/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV1/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV1/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV1/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV1/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV1/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV1/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV1/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Connecting Colors
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV2/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV2/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV2/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV2/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV2/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV2/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV2/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV2/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Pattern Recognition
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV3/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV3/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV3/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV3/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV3/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV3/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV3/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV3/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Odd-one-out
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV4/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV4/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV4/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV4/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV4/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV4/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV4/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV4/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Counting Objects
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV5/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV5/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV5/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV5/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV5/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV5/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV5/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV5/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+  <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+       Visual Analogy
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SV6/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SV6/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SV6/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SV6/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SV6/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SV6/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SV6/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SV6/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 1.8em; font-weight: bold" class="sansserif">Case Demonstration: Symbolic & Logical Reasoning</p>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Sudoku Completion
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL1/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL1/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL1/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL1/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL1/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL1/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL1/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL1/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Symbolic Reasoning
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL2/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL2/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL2/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL2/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL2/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL2/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL2/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL2/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Arithmetic
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL3/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL3/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL3/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL3/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL3/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL3/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL3/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL3/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Visual Deduction
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL4/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL4/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL4/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL4/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL4/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL4/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL4/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL4/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Transitive Reasoning
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL5/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL5/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL5/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL5/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL5/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL5/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL5/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL5/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+  <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+       Game Rule
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/SL6/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/SL6/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/SL6/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/SL6/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/SL6/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/SL6/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/SL6/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/SL6/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="content">
+  <p style="text-align:center; font-size: 1.8em; font-weight: bold" class="sansserif">Case Demonstration: Action Planning & Task Execution</p>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Tool Use
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT1/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT1/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT1/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT1/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT1/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT1/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT1/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT1/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Robot Navigation
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT2/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT2/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT2/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT2/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT2/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT2/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT2/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT2/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Goal-directed Planning
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT3/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT3/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT3/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT3/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT3/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT3/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT3/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT3/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Multi-step Manipulation
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT4/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT4/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT4/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT4/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT4/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT4/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT4/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT4/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+    <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+        Instruction Following
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT5/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT5/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT5/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT5/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT5/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT5/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT5/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT5/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+
+  <div class="row" style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1.5em;">
+    <div class="text-column" style="flex: 0 0 120px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; padding-top: 100px;">
+      <p class="text-prompt" style="font-weight: bold; font-size: 1.2em; margin: 0;">
+       Game Strategy
+      </p>
+    </div>
+
+    <!-- 3 videos -->
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Sora 2</p>
+      <a href="Demo_video/AT6/sora.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/sora.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Veo 3.1</p>
+      <a href="Demo_video/AT6/veo.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/veo.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Kling 2.1</p>
+      <a href="Demo_video/AT6/kling.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/kling.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+
+  <!-- Second row: 4 videos without prompt -->
+  <div class="row" style="display: flex; gap: 1em;">
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.2</p>
+      <a href="Demo_video/AT6/wan2.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/wan2.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">Wan2.1</p>
+      <a href="Demo_video/AT6/wan1.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/wan1.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">HunyuanVideo</p>
+      <a href="Demo_video/AT6/hyv.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/hyv.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+    <div class="column video-column" style="flex: 1;">
+      <p class="model-name">CogVideoX1.5</p>
+      <a href="Demo_video/AT6/cvx.mp4" target="_blank">
+        <video autoplay controls loop muted src="Demo_video/AT6/cvx.mp4" style="width: 100%;"></video>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="content" id="bibtex">
+  <p style="text-align:left; font-size: 2em; font-weight: bold" class="serif">BibTeX</p>
+  <code>
+  @article{chen2025tivibench,<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;title={TiViBench: Benchmarking Think-in-Video Reasoning for Video Generation},<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;author={Chen, Harold Haodong and Lan, Disen and Shu, Wen-Jie and Liu, Qingyang and Wang, Zihan and Chen, Sirui and Cheng, Wenkai and Chen, Kanghao and Zhang, Hongfei and Zhang, Zixin and Guo, Rongjin and Cheng, Yu and Chen, Ying-Cong},<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;journal={arXiv preprint arXiv:2508.xxxxx},<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;year={2025}<br>
+  }
+  </code>
+</div>
+
+<div class="content">
+  <p class="serif">
+    Project page template is borrowed from <a href="https://dreambooth.github.io/">DreamBooth</a>.
+  </p>
+</div>
+
+<style>
+  .gradient-text {
+      font-weight: bold;
+      background: linear-gradient(to right, purple, red, orange); /* 定义渐变色 */
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: "Times New Roman", Times, serif;
+  }
+</style>
+
+<style>
+  .gradient-black {
+      font-weight: bold;
+      background: linear-gradient(to right, black, black); /* 定义渐变色 */
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: "Times New Roman", Times, serif;
+  }
+</style>
+
+</body>
+
+<script>
+  var videos = document.getElementsByClassName("clickplay");
+  for (var i = 0; i < videos.length; i++) {
+    videos[i].addEventListener("click", function() {
+      this.play();
+    });
+    videos[i].addEventListener("ended", function() {
+      this.pause();
+      this.currentTime = 0;
+    });
+  }
+</script>
+
+</html>

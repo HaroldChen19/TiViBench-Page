@@ -1,0 +1,243 @@
+/* CSS Document */
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+body {
+  font-family: 'Open-Sans', sans-serif;
+  font-weight: 300;
+  background-color: #fff;
+}
+.content {
+  width: 1100px;
+  padding: 25px 50px;
+  margin: 25px auto;
+  background-color: white;
+  box-shadow: 0px 0px 10px #999;
+  border-radius: 15px;
+  font-family: "Google Sans";
+}
+.interpolation-video {
+  max-width: 60%; /* 限制视频宽度 */
+  max-height: 60%; /* 限制视频高度 */
+  object-fit: contain; /* 保持视频比例 */
+}
+/* 父容器样式 */
+/* 父容器样式 */
+/* 父容器样式 */
+.row {
+  display: flex;
+  flex-wrap: nowrap; /* 不换行 */
+  justify-content: space-between; /* 子元素之间均匀分布 */
+  align-items: center; /* 垂直居中对齐 */
+  gap: 1px; /* 每个视频之间的间距 */
+  width: 100%; /* 行宽度占满父容器 */
+}
+
+/* 文本列样式 */
+.text-column {
+  flex: 0 0 10%; /* 每个文字列占据 15% 的宽度 */
+  text-align: left; /* 文字左对齐 */
+  padding: 1px;
+}
+
+/* 文本样式 */
+.text-prompt {
+  font-size: 20px; /* 调整文字大小 */
+  font-weight: bold;
+  color: #333;
+  margin: 34px 0 0 0; /* 增加顶部外边距，向下移动文本 */
+  word-wrap: break-word; /* 如果文字过长，自动换行 */
+}
+
+
+/* 视频列样式 */
+.video-column {
+  flex: 0 0 18%; /* 每个视频列占据 20% 的宽度 */
+  text-align: center;
+  padding: -10px;
+}
+
+/* 视频样式 */
+.video-column video {
+  width: 100%; /* 视频宽度占满父容器 */
+  max-width: 300px; /* 限制视频最大宽度 */
+  height: auto; /* 自动调整高度以保持比例 */
+  border-radius: 10px; /* 视频边角圆润 */
+  box-shadow: 0px 0px 10px #999; /* 添加阴影效果 */
+}
+/* 模型名称样式 */
+.model-name {
+  font-size: 14px; /* 调整字体大小 */
+  font-weight: bold; /* 加粗文字 */
+  text-align: center; /* 居中显示 */
+  margin-bottom: 1px; /* 与视频之间的间距 */
+  color: #555; /* 设置文字颜色 */
+}
+
+
+
+/* 调整间距 */
+.row .column {
+  margin: 0 5px; /* 列之间的间距 */
+}
+
+.contentblock {
+  width: 950px;
+  margin: 0 auto;
+  padding: 0;
+  border-spacing: 25px 0;
+}
+
+.contentblock td {
+  background-color: #fff;
+  padding: 25px 50px;
+  vertical-align: top;
+  box-shadow: 0px 0px 10px #999;
+  border-radius: 15px;
+}
+a, a:visited {
+  color: #002969;
+  font-weight: 300;
+}
+#authors {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+#conference {
+  text-align: center;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+#authors a {
+  margin: 0 10px;
+}
+h1 {
+  text-align: center;
+  font-size: 35px;
+  font-weight: 300;
+}
+h2 {
+  font-size: 30px;
+  font-weight: 300;
+}
+code {
+  display: block;
+  padding: 10px;
+  margin: 10px 10px;
+}
+p {
+  line-height: 25px;
+  text-align: justify;
+}
+p code {
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
+#teasers {
+  margin: 0 auto;
+}
+#teasers td {
+  margin: 0 auto;
+  text-align: center;
+  padding: 5px;
+}
+#teasers img {
+  width: 250px;
+}
+#results img {
+  width: 133px;
+}
+#seeintodark {
+  margin: 0 auto;
+}
+#sift {
+  margin: 0 auto;
+}
+#sift img {
+  width: 250px;
+}
+.downloadpaper {
+  padding-left: 20px;
+  float: right;
+  text-align: center;
+}
+.downloadpaper a {
+  font-weight: bold;
+  text-align: center;
+}
+.teaser-img {
+  width: 80%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.teaser-gif {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.summary-img {
+  width: 100%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.video-iframe {
+  width: 1000;
+  height: 800;
+  margin: auto;
+  display: block;
+}
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+.image {
+  flex-basis: 40%
+}
+.text {
+  font-size: 20px;
+  padding-left: 20px;
+}
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.boxshadow {
+  border: 1px solid;
+  padding: 10px;
+  box-shadow: 2px 2px 5px #888888;
+}
+.spacertr {
+  height: 8px;
+}
+.spacertd {
+  width: 40px;
+}
+
+.row::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+.col {
+  float: left;
+  width: 33.33%;
+  box-sizing: border-box;
+  padding: 2px;
+}
+
+.col-gallery {
+  float: left;
+  /* width: 25%; */
+  width: 49%;
+  box-sizing: border-box;
+  padding: 1px;
+}
+
+.example-img {
+  width: 100%;
+}
